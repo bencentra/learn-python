@@ -28,4 +28,4 @@ A program to manage several lists.
     * When adding, re-sort the list
   * If deleting, prompt the user for a number to delete
   * If quitting, prompt to save unsaved changes
-* Also prompt to Save if the list has changes
+* Also prompt to Save if the list has changed

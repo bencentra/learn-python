@@ -17,25 +17,32 @@ def main():
         if (len(files) > 1):
             index = get_int("Load file number: ") - 1
         items = read_file(files[index])
-        print_list(items)
         changed = False
         # Interact with the list
         while True:
+            items = sorted(items)
+            print_list(items)
             action = get_action(items, changed)
             if action == 'a':
-                print('Add')
-                changed = True
+                if add_item(items):
+                    changed = True
             elif action == 'd':
-                print('Delete')
+                if delete_item(items):
+                    changed = True
             elif action == 's':
-                print('Save')
+                write_file(files[index], items)
                 changed = False
+                print("List saved.")
             elif action == 'q':
-                print('Quit')
+                # Quit the program
+                if changed is True:
+                    should_save = get_string("Save unsaved changes (y/n)? ")
+                    if should_save.lower() == 'y':
+                        write_file(files[index], items)
+                        changed = False
+                quit()
             else:
                 print("Invalid action.")
-    except ValueError as err:
-        print(err)
     except KeyboardInterrupt:
         quit()
 
@@ -67,16 +74,21 @@ def print_list(my_list):
     except TypeError:
         print("That list is empty!")
 
-def write_file(filename, content=""):
+def write_file(filename, list=[]):
     """
     Write a file <filename> with the given <content>
     """
     fh = None
     try:
         fh = open(filename, "w", encoding="utf8")
+        content = ""
+        for item in list:
+            content += "{}\n".format(str(item))
         fh.write(content)
     except EnvironmentError as err:
         print("Error writing file:", err)
+    except ValueError as err2:
+        print("Error stringifying file contents:", err2)
     else:
         print("Saved file")
     finally:
@@ -98,7 +110,36 @@ def read_file(filename):
     finally:
         if fh is not None:
             fh.close()
-    return sorted(lines)
+    return lines
+
+def add_item(list):
+    """
+    Add an item to the list
+    """
+    new_item = get_string("Add item: ")
+    if len(new_item) > 0:
+        list.append(new_item)
+        print("Added {}".format(new_item))
+        return True
+    else:
+        print("Item can't be empty.")
+    return False
+
+def delete_item(list):
+    """
+    Delete an item from the list
+    """
+    delete_index = get_int("Delete item nubmer: ")
+    try:
+        if delete_index > 0:
+            deleted_item = list.pop(delete_index - 1)
+            print("Deleted {}".format(deleted_item))
+            return True
+        else:
+            print("No item selected to delete.");
+    except IndexError:
+        print("Invalid item number.")
+    return False
 
 def get_action(items=[], changed=False):
     """
